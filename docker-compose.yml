@@ -1,0 +1,42 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    image: books-python-image
+    container_name: books_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: bash -c
+      "python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - celery
+      - rabitmq
+    restart: on-failure # always
+    environment:
+      DEBUG: ${DEBUG}
+      CELERY_BROKER_URL: ${CELERY_BROKER}
+      CELERY_RESULT_BACKEND: ${CELERY_BACKEND}
+
+  celery:
+    image: books-python-image
+    container_name: boks-app-celery
+    command: celery -A app worker -P prefork -c 2 -l info
+    volumes:
+    - ./app:/app
+    depends_on:
+      - rabitmq
+    restart: on-failure
+
+  rabitmq:
+    image: rabbitmq:3-management
+    container_name: books-rabbitmq
+    ports:
+    - '15672:15672'
+    - '5672:5672'
+    restart: on-failure
