@@ -15,23 +15,26 @@ services:
       "python manage.py migrate
       && python manage.py runserver 0.0.0.0:8000"
     depends_on:
-      - celery
       - rabitmq
     restart: on-failure # always
     environment:
-      DEBUG: ${DEBUG}
-      CELERY_BROKER_URL: ${CELERY_BROKER}
-      CELERY_RESULT_BACKEND: ${CELERY_BACKEND}
+      - DEBUG=${DEBUG}
+      - C_BROKER=${CELERY_BROKER}
+      - C_BACKEND=${CELERY_BACKEND}
 
   celery:
     image: books-python-image
-    container_name: boks-app-celery
+    container_name: books-app-celery
     command: celery -A app worker -P prefork -c 2 -l info
     volumes:
-    - ./app:/app
+      - ./app:/app
     depends_on:
       - rabitmq
     restart: on-failure
+    environment:
+      - DEBUG=${DEBUG}
+      - C_BROKER=${CELERY_BROKER}
+      - C_BACKEND=${CELERY_BACKEND}
 
   rabitmq:
     image: rabbitmq:3-management
