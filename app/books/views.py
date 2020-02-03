@@ -1,18 +1,24 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
 from .forms import (SignUpForm, LogInForm)
 from .tasks import send_email
-
+from .models import BooksModel
 
 class BooksMainPage(TemplateView):
     template_name = 'books/books_main_page.html'
 
     def get(self, request, *args, **kwargs):
-        response = {}
+
+        books = BooksModel.objects.all()
+        paginator = Paginator(books, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        response = {'page_obj': page_obj}
         return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):

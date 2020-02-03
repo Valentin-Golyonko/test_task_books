@@ -7,7 +7,63 @@
 {% block content %}
 
     <div>
-        Hello books
+        <h3>Books list</h3>
+
+        <input class="form-control" id="search_book" type="text" placeholder="search Book / Author / ISBN ...">
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col">ISBN</th>
+            </tr>
+            </thead>
+            <tbody id="book_table">
+            {% for book in page_obj %}
+                <tr>
+                    <th scope="row">{{ forloop.counter0|add:page_obj.start_index }}</th>
+                    <td>{{ book.title }}</td>
+                    <td>{{ book.author }}</td>
+                    <td>{{ book.isbn }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation example" class="text-center">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
+                    <li class="page-item"><a class="page-link"
+                                             href="?page={{ page_obj.previous_page_number }}">previous</a></li>
+                {% endif %}
+                <span class="current m-2">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last
+                        &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
     </div>
+
+    <script>
+        {#// Perform a case-insensitive search for items in a table#}
+        $(document).ready(function () {
+            $("#search_book").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#book_table tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
 
 {% endblock %}
