@@ -1,0 +1,13 @@
+{% extends 'books/books_template.html' %}
+
+{% block title %}
+Thank you for Registration
+{% endblock %}
+
+{% block content %}
+    <p>Thank you for registering to our site!</p>
+    <p>Your password was sent to your email</p>
+
+    <p>Check it and <a class="btn btn-success" href="{% url 'login' %}">Login</a></p>
+
+{% endblock %}

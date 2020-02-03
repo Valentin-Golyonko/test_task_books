@@ -1,10 +1,12 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
 from .forms import SignUpForm
+from .tasks import send_email
 
 
 class BooksMainPage(TemplateView):
@@ -29,18 +31,24 @@ class RegisterPage(TemplateView):
     def post(self, request):
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            user_password = '1234567890'
+            user_form = form.save(commit=False)
+            user_first_name = form.cleaned_data.get('first_name')
+            user_password = User.objects.make_random_password()  # MKS3qFW2uK
             user_email = form.cleaned_data.get('email')
-            # send_email.delay(user_email, user_password)
 
-            user = authenticate(request, username=username, password=user_password)
-            login(request, user)
-            print('login - OK')
+            create_user = User.objects.create_user(username=user_first_name,
+                                                   email=user_email, password=user_password)
+            create_user.save()
+
+            user_form.user = create_user
+            user_form.save()
+
+            send_email.delay(user_first_name, user_email, user_password)
+
+            return redirect(to='ty-signup')
         else:
             print('! Error in Registration form validation !')
-        return redirect(to='main-page')
+        return redirect(to='signup')
 
 
 class LogInPage(TemplateView):
@@ -53,14 +61,23 @@ class LogInPage(TemplateView):
     def post(self, request):
         username = request.POST['username']
         password = request.POST['password']
+        print(username, password)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             print('login - OK')
             return redirect(to='main-page')
         else:
-            print('invalid login')
-            return redirect(to='signup')
+            print('invalid login - ERROR')
+            return redirect(to='login')
+
+
+class TySignUpPage(TemplateView):
+    template_name = 'books/ty_for_signup.html'
+
+    def get(self, request, *args, **kwargs):
+        response = {}
+        return render(request=request, template_name=self.template_name, context=response)
 
 
 class SomeClass(TemplateView):

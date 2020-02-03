@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile-app
     image: books-python-image
-    container_name: books_app
+    container_name: books-app
     ports:
       - "8000:8000"
     volumes:
@@ -24,7 +24,7 @@ services:
 
   celery:
     image: books-python-image
-    container_name: books-app-celery
+    container_name: books-celery
     command: celery -A app worker -P prefork -c 2 -l info
     volumes:
       - ./app:/app
