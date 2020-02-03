@@ -1,5 +1,7 @@
 from django.contrib import admin
 
-from .models import Profile
+from .models import (ProfileModel, BooksModel)
 
-admin.site.register(Profile)
+admin.site.register(ProfileModel)
+admin.site.register(BooksModel)
+

@@ -2,3 +2,5 @@ Django
 djangorestframework
 celery
 django-crispy-forms
+beautifulsoup4
+requests

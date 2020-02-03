@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
-from .forms import SignUpForm, LogInForm
+from .forms import (SignUpForm, LogInForm)
 from .tasks import send_email
 
 
@@ -20,7 +20,7 @@ class BooksMainPage(TemplateView):
         pass
 
 
-class RegisterPage(TemplateView):
+class SignUpPage(TemplateView):
     template_name = 'books/sign_up_page.html'
 
     def get(self, request, *args, **kwargs):
@@ -98,4 +98,3 @@ class SomeClass(TemplateView):
     @login_required(login_url='signin/')
     def get(self, request, *args, **kwargs):
         pass
-

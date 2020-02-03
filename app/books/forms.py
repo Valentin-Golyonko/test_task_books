@@ -1,12 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Profile
+from .models import (ProfileModel)
 
 
 class SignUpForm(forms.ModelForm):
     class Meta:
-        model = Profile
+        model = ProfileModel
         fields = ('first_name', 'last_name', 'email', 'phone',
                   'address', 'city',)
 

@@ -3,13 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class Profile(models.Model):
-    """
-    Регистрация
-    1.1 Обязательные поля email, имя, фамилия, номер телефона
-    1.2 Необязательные поля адрес, город
-    1.3 После регистрации асинхронно выслать email с паролем
-    """
+class ProfileModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=30, blank=False, null=False)
     last_name = models.CharField(max_length=30, blank=False, null=False)
@@ -20,3 +14,22 @@ class Profile(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.first_name, self.last_name)
+
+    class Meta:
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'Users Profiles'
+
+
+class BooksModel(models.Model):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    author = models.CharField(max_length=100, blank=True, null=True)
+    sales = models.PositiveIntegerField(default=0, blank=True, null=True)
+    sold_day = models.DateField()
+    isbn = models.CharField(max_length=20, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Book'
+        verbose_name_plural = 'Books'
+
+    def __str__(self):
+        return self.title
