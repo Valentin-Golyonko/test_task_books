@@ -9,7 +9,19 @@
     <div>
         <h3>Books list</h3>
 
-        <input class="form-control" id="search_book" type="text" placeholder="search on this page ...">
+        <div class="input-group mb-3">
+            <input class="form-control rounded" id="search_book" type="text" placeholder="search on this page"
+                   aria-label="search on this page">
+            <p class="m-2">or</p>
+            <form method="post" class="form-inline">
+                {% csrf_token %}
+                <input type="text" class="form-control rounded-left" placeholder="search in the data base"
+                       aria-label="Search in the data base" aria-describedby="button-addon2" name="input_search">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Go</button>
+                </div>
+            </form>
+        </div>
 
         <table class="table table-hover">
             <thead>

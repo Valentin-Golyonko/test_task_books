@@ -26,8 +26,8 @@ class BooksMainPage(TemplateView):
         return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
-        print("BooksMainPage.POST:", request.POST)
-        pass
+        data_to_search = request.POST['input_search']
+        return redirect(to='search', search_it=data_to_search)
 
 
 class SignUpPage(TemplateView):
@@ -158,6 +158,20 @@ class BookStatisticPage(TemplateView):
                     'sold_vs_all_books': sold_vs_all_books,
                     }
         return render(request=request, template_name=self.template_name, context=response)
+
+
+def search_page(request, search_it):
+    """ - Общий фильтр по названию книги, имени автора, артикулу """
+    if request.method == 'GET':
+        found_books = BooksModel.objects.filter(title__contains=search_it)
+        found_authors = AuthorModel.objects.filter(author_name__contains=search_it)
+        found_isbn = BooksModel.objects.filter(isbn__contains=search_it)
+        data = {'found_books': found_books,
+                'found_authors': found_authors,
+                'found_isbn': found_isbn,
+                'search_it': search_it,
+                }
+        return render(request=request, template_name='books/book_search.html', context=data)
 
 
 class NotificationPage(TemplateView):

@@ -1,0 +1,32 @@
+{% extends 'books/books_template.html' %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block content %}
+
+    <h3>Results what was found for the request "{{ search_it }}"</h3>
+
+    <h4>Books:</h4>
+    {% for found_book in found_books %}
+        <p>{{ found_book.title }}</p>
+    {% empty %}
+        <p>Nothing was found</p>
+    {% endfor %}
+
+    <h4>Authors:</h4>
+    {% for found_author in found_authors %}
+        <p>{{ found_author.author_name }}</p>
+    {% empty %}
+        <p>Nothing was found</p>
+    {% endfor %}
+
+    <h4>Books with ISBN:</h4>
+    {% for isbn in found_isbn %}
+        <p>{{ isbn }}</p>
+    {% empty %}
+        <p>Nothing was found</p>
+    {% endfor %}
+
+{% endblock %}
