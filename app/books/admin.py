@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (ProfileModel, BooksModel, BooksSalesModel,
-                     AuthorModel)
+                     AuthorModel, NotificationsModel)
 
 
 class BooksSalesInline(admin.StackedInline):
@@ -20,4 +20,5 @@ class AuthorAdmin(admin.ModelAdmin):
 admin.site.register(ProfileModel)
 admin.site.register(BooksModel, BooksAdmin)
 admin.site.register(BooksSalesModel)
+admin.site.register(NotificationsModel)
 admin.site.register(AuthorModel, AuthorAdmin)

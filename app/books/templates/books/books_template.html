@@ -19,6 +19,9 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'books/css/my_css.css' %}">
+
     <title>{% block title %}Title{% endblock %} - Test Task</title>
 </head>
 <body>
@@ -36,7 +39,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="{% url 'main-page' %}">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{% url 'main-page' %}">Books list</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'statistics' %}">Books statistic</a>
@@ -50,9 +53,15 @@
                 </ul>
 
                 <form class="form-inline my-2 my-lg-0">
-                    <a class="btn btn-info mr-sm-2" href="{% url 'notifications' %}">Notifications</a>
-                    <a class="btn btn-success mr-sm-2" href="{% url 'login' %}">Login</a>
-                    <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
+                    <a class="btn btn-info mr-sm-2" href="{% url 'notifications' %}">
+                        Notifications <span class="badge badge-warning">{{ msg_count|default:'0' }}</span>
+                    </a>
+                    {% if is_authed == 0 %}
+                        <a class="btn btn-success mr-sm-2" href="{% url 'login' %}">Login</a>
+                        <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
+                    {% else %}
+                        <a class="btn btn-success" href="{% url 'logout' %}">Logout</a>
+                    {% endif %}
                 </form>
             </div>
         </nav>
@@ -63,6 +72,10 @@
         {% block content %}{% endblock %}
     </div>
 
+</div>
+
+<div class="message-include">
+    {% include 'books/messages.html' %}
 </div>
 
 </body>

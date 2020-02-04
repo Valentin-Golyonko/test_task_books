@@ -1,15 +1,19 @@
 from datetime import date
 
+from django.contrib import messages
 from django.contrib.auth import login, authenticate
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
+from .backends import work_with_notifications
 from .forms import (SignUpForm, LogInForm)
-from .models import (BooksModel, BooksSalesModel, AuthorModel)
+from .models import (BooksModel, BooksSalesModel, AuthorModel, NotificationsModel)
 from .tasks import send_email
 
 
@@ -22,7 +26,12 @@ class BooksMainPage(TemplateView):
         paginator = Paginator(books, 20)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        response = {'page_obj': page_obj}
+
+        response = {'page_obj': page_obj,
+                    'messages': get_messages(request),
+                    'msg_count': work_with_notifications(request.user, 'count'),
+                    'is_authed': int(request.user.is_authenticated),
+                    }
         return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
@@ -34,8 +43,11 @@ class SignUpPage(TemplateView):
     template_name = 'books/sign_up_page.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request=request, template_name=self.template_name,
-                      context={'form': SignUpForm()})
+        response = {'form': SignUpForm(),
+                    'messages': get_messages(request),
+                    'is_authed': int(request.user.is_authenticated),
+                    }
+        return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
         form = SignUpForm(request.POST)
@@ -55,14 +67,13 @@ class SignUpPage(TemplateView):
             user_form.user = create_user
             user_form.save()
 
-            # print('username: %s, user_email: %s, password: %s' % (user_first_name,
-            #                                                       user_email, user_password))
             """ - После регистрации асинхронно выслать email с паролем """
             send_email.delay(user_first_name, user_email, user_password)
 
+            messages.success(request, 'Registration success!')
             return redirect(to='ty-signup')
         else:
-            print('! Error in Registration form validation !')
+            messages.error(request, 'Error in Registration form validation!')
         return redirect(to='signup')
 
 
@@ -71,8 +82,11 @@ class LogInPage(TemplateView):
     template_name = 'books/login.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request=request, template_name=self.template_name,
-                      context={'form': LogInForm()})
+        response = {'form': LogInForm(),
+                    'messages': get_messages(request),
+                    'is_authed': int(request.user.is_authenticated),
+                    }
+        return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
         form = LogInForm(request.POST)
@@ -82,19 +96,21 @@ class LogInPage(TemplateView):
             try:
                 get_username = User.objects.get(email=email)
             except Exception as ex:
-                print('! Error in User.objects.get(email=email) !\n%s' % ex)
+                print('! Error in User email) !\n%s' % ex)
+                messages.error(request, 'Email is wrong!')
                 return redirect(to='login')
             else:
                 user = authenticate(request, username=get_username.username, password=password)
                 if user is not None:
                     login(request, user)
-                    print('login - OK')
+                    messages.success(request, 'Login success!')
+                    work_with_notifications(request.user, 'set', 'Login success!')
                     return redirect(to='main-page')
                 else:
-                    print('! invalid login - ERROR')
+                    messages.error(request, 'Invalid Password!')
                     return redirect(to='login')
         else:
-            print('! Error in Login form validation !')
+            messages.error(request, 'Error in Login form validation!')
             return redirect(to='login')
 
 
@@ -102,7 +118,10 @@ class TySignUpPage(TemplateView):
     template_name = 'books/ty_for_signup.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request=request, template_name=self.template_name, context={})
+        return render(request=request, template_name=self.template_name,
+                      context={'messages': get_messages(request),
+                               'is_authed': int(request.user.is_authenticated),
+                               })
 
 
 class BookStatisticPage(TemplateView):
@@ -156,6 +175,8 @@ class BookStatisticPage(TemplateView):
                     'books_sold': books_sold,
                     'all_books': all_books,
                     'sold_vs_all_books': sold_vs_all_books,
+                    'msg_count': work_with_notifications(request.user, 'count'),
+                    'is_authed': int(request.user.is_authenticated),
                     }
         return render(request=request, template_name=self.template_name, context=response)
 
@@ -163,24 +184,43 @@ class BookStatisticPage(TemplateView):
 def search_page(request, search_it):
     """ - Общий фильтр по названию книги, имени автора, артикулу """
     if request.method == 'GET':
-        found_books = BooksModel.objects.filter(title__contains=search_it)
-        found_authors = AuthorModel.objects.filter(author_name__contains=search_it)
-        found_isbn = BooksModel.objects.filter(isbn__contains=search_it)
-        data = {'found_books': found_books,
-                'found_authors': found_authors,
-                'found_isbn': found_isbn,
+        work_with_notifications(request.user, method='set', msg="search: %s" % search_it)
+
+        data = {'found_books': BooksModel.objects.filter(title__contains=search_it),
+                'found_authors': AuthorModel.objects.filter(author_name__contains=search_it),
+                'found_isbn': BooksModel.objects.filter(isbn__contains=search_it),
                 'search_it': search_it,
+                'msg_count': work_with_notifications(request.user, 'count'),
+                'is_authed': int(request.user.is_authenticated),
                 }
         return render(request=request, template_name='books/book_search.html', context=data)
 
 
 class NotificationPage(TemplateView):
-    """ 3.3 Список нотификаций """
+    """ - Персональные нотификации. Выводить не больше 5 ранее виденных.
+    Выделить впервые увиденные нотификации
+    """
     template_name = 'books/books_notification.html'
 
     def get(self, request, *args, **kwargs):
-        response = {}
+        user_msg = work_with_notifications(request.user, 'get')
+
+        NotificationsModel.objects.filter(is_read=False).update(is_read=True)
+
+        old_notif = NotificationsModel.objects.filter(is_read=True).order_by('-id')
+        msg_old_5 = [i.message for i in old_notif[:5]]
+
+        response = {'user_msg': user_msg,
+                    'user': request.user,
+                    'msg_old_5': msg_old_5,
+                    'is_authed': int(request.user.is_authenticated),
+                    }
         return render(request=request, template_name=self.template_name, context=response)
+
+
+def logout_user(request):
+    logout(request)
+    return redirect(to='main-page')
 
 
 class SomeClass(TemplateView):

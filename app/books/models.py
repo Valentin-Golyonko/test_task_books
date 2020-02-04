@@ -32,6 +32,7 @@ class BooksModel(models.Model):
     class Meta:
         verbose_name = 'Book'
         verbose_name_plural = 'Books'
+        ordering = ['id']
 
     def __str__(self):
         return self.title
@@ -59,3 +60,16 @@ class AuthorModel(models.Model):
 
     def __str__(self):
         return self.author_name
+
+
+class NotificationsModel(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=50, blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+
+    def __str__(self):
+        return self.message

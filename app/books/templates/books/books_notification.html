@@ -6,6 +6,17 @@
 
 {% block content %}
 
-    TBA
+    <h4>Your notifications, {{ user|default:'?' }}:</h4>
+    {% if user_msg %}
+        {% for message in user_msg %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if msg_old_5 %}
+        {% for message in msg_old_5 %}
+            <div class="alert alert-light" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}
