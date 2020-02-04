@@ -21,6 +21,13 @@ services:
       - DEBUG=${DEBUG}
       - C_BROKER=${CELERY_BROKER}
       - C_BACKEND=${CELERY_BACKEND}
+      - E_BACKEND=${EMAIL_BACKEND}
+      - E_HOST=${EMAIL_HOST}
+      - E_USE_TLS=${EMAIL_USE_TLS}
+      - E_USE_SSL=${EMAIL_USE_SSL}
+      - E_PORT=${EMAIL_POR}
+      - E_HOST_USER=${EMAIL_HOST_USER}
+      - E_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
 
   celery:
     image: books-python-image
@@ -35,6 +42,13 @@ services:
       - DEBUG=${DEBUG}
       - C_BROKER=${CELERY_BROKER}
       - C_BACKEND=${CELERY_BACKEND}
+      - E_BACKEND=${EMAIL_BACKEND}
+      - E_HOST=${EMAIL_HOST}
+      - E_USE_TLS=${EMAIL_USE_TLS}
+      - E_USE_SSL=${EMAIL_USE_SSL}
+      - E_PORT=${EMAIL_POR}
+      - E_HOST_USER=${EMAIL_HOST_USER}
+      - E_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
 
   rabitmq:
     image: rabbitmq:3-management

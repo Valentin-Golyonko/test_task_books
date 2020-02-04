@@ -123,13 +123,13 @@ USE_L10N = True
 USE_TZ = True
 
 # Send email Google
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'USER@gmail.com'
-EMAIL_HOST_PASSWORD = 'PASSWORD'
+EMAIL_BACKEND = os.environ.get('E_BACKEND')
+EMAIL_HOST = os.environ.get('E_HOST')
+EMAIL_USE_TLS = int(os.environ.get('E_USE_TLS', default=-1))
+EMAIL_USE_SSL = int(os.environ.get('E_USE_SSL', default=-1))
+EMAIL_PORT = os.environ.get('E_PORT')
+EMAIL_HOST_USER = os.environ.get('E_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('E_HOST_PASSWORD')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
