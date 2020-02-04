@@ -4,16 +4,16 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-
+from django.db.models import Avg, Count, Sum
 from .forms import (SignUpForm, LogInForm)
-from .tasks import send_email
-from .models import BooksModel
+# from .tasks import send_email
+from .models import BooksModel, BooksSalesModel
+from datetime import date
 
 class BooksMainPage(TemplateView):
     template_name = 'books/books_main_page.html'
 
     def get(self, request, *args, **kwargs):
-
         books = BooksModel.objects.all()
         paginator = Paginator(books, 20)
         page_number = request.GET.get('page')
@@ -30,8 +30,8 @@ class SignUpPage(TemplateView):
     template_name = 'books/sign_up_page.html'
 
     def get(self, request, *args, **kwargs):
-        form = SignUpForm()
-        return render(request=request, template_name=self.template_name, context={'form': form})
+        return render(request=request, template_name=self.template_name,
+                      context={'form': SignUpForm()})
 
     def post(self, request):
         form = SignUpForm(request.POST)
@@ -65,8 +65,8 @@ class LogInPage(TemplateView):
     template_name = 'books/login.html'
 
     def get(self, request, *args, **kwargs):
-        form = LogInForm()
-        return render(request=request, template_name=self.template_name, context={'form': form})
+        return render(request=request, template_name=self.template_name,
+                      context={'form': LogInForm()})
 
     def post(self, request):
         form = LogInForm(request.POST)
@@ -96,11 +96,37 @@ class TySignUpPage(TemplateView):
     template_name = 'books/ty_for_signup.html'
 
     def get(self, request, *args, **kwargs):
+        return render(request=request, template_name=self.template_name, context={})
+
+
+class BookStatisticPage(TemplateView):
+    template_name = 'books/books_statistic.html'
+
+    def get(self, request, *args, **kwargs):
+        books_sales = BooksSalesModel.objects.all()
+        total_sales = books_sales.aggregate(Sum('sales'))['sales__sum']
+
+        months = [i for i in range(1, 13)]
+        month_now = date.today().month
+
+        sales_last_month = books_sales.filter(
+            sold_day__month=months[month_now-2]).aggregate(Sum('sales'))['sales__sum']
+
+        response = {'total_sales': total_sales,
+                    'sales_last_month': sales_last_month,
+                    }
+        return render(request=request, template_name=self.template_name, context=response)
+
+
+class NotificationPage(TemplateView):
+    template_name = 'books/books_notification.html'
+
+    def get(self, request, *args, **kwargs):
         response = {}
         return render(request=request, template_name=self.template_name, context=response)
 
 
 class SomeClass(TemplateView):
-    @login_required(login_url='signin/')
+    @login_required(login_url='login/')
     def get(self, request, *args, **kwargs):
         pass

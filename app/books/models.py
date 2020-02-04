@@ -23,8 +23,6 @@ class ProfileModel(models.Model):
 class BooksModel(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
     author = models.CharField(max_length=100, blank=True, null=True)
-    sales = models.PositiveIntegerField(default=0, blank=True, null=True)
-    sold_day = models.DateField()
     isbn = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
@@ -33,3 +31,16 @@ class BooksModel(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class BooksSalesModel(models.Model):
+    book = models.ForeignKey(to='BooksModel', on_delete=models.CASCADE, blank=True, null=True)
+    sales = models.PositiveIntegerField(default=0, blank=True, null=True)
+    sold_day = models.DateField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Books sales'
+        verbose_name_plural = 'Books sales'
+
+    def __str__(self):
+        return self.book.title

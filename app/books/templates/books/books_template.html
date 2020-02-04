@@ -39,7 +39,7 @@
                         <a class="nav-link" href="{% url 'main-page' %}">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Books statistic</a>
+                        <a class="nav-link" href="{% url 'statistics' %}">Books statistic</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Export books</a>
@@ -50,7 +50,7 @@
                 </ul>
 
                 <form class="form-inline my-2 my-lg-0">
-                    <a class="btn btn-info mr-sm-2" href="#">Notifications</a>
+                    <a class="btn btn-info mr-sm-2" href="{% url 'notifications' %}">Notifications</a>
                     <a class="btn btn-success mr-sm-2" href="{% url 'login' %}">Login</a>
                     <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
                 </form>
