@@ -4,6 +4,10 @@ from django.db import models
 
 
 class ProfileModel(models.Model):
+    """
+    - Обязательные поля email, имя, фамилия, номер телефона
+    - Необязательные поля адрес, город
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=30, blank=False, null=False)
     last_name = models.CharField(max_length=30, blank=False, null=False)
@@ -22,8 +26,8 @@ class ProfileModel(models.Model):
 
 class BooksModel(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
-    author = models.CharField(max_length=100, blank=True, null=True)
     isbn = models.CharField(max_length=20, blank=True, null=True)
+    author = models.ManyToManyField(to='AuthorModel')
 
     class Meta:
         verbose_name = 'Book'
@@ -44,3 +48,14 @@ class BooksSalesModel(models.Model):
 
     def __str__(self):
         return self.book.title
+
+
+class AuthorModel(models.Model):
+    author_name = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Author'
+        verbose_name_plural = 'Authors'
+
+    def __str__(self):
+        return self.author_name

@@ -1,16 +1,20 @@
+from datetime import date
+
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.db.models import Sum
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-from django.db.models import Avg, Count, Sum
+
 from .forms import (SignUpForm, LogInForm)
-# from .tasks import send_email
-from .models import BooksModel, BooksSalesModel
-from datetime import date
+from .models import (BooksModel, BooksSalesModel, AuthorModel)
+from .tasks import send_email
+
 
 class BooksMainPage(TemplateView):
+    """ 3.2 Список книг """
     template_name = 'books/books_main_page.html'
 
     def get(self, request, *args, **kwargs):
@@ -51,9 +55,10 @@ class SignUpPage(TemplateView):
             user_form.user = create_user
             user_form.save()
 
-            # send_email.delay(user_first_name, user_email, user_password)
-            print('username: %s, user_email: %s, password: %s' % (user_first_name,
-                                                                  user_email, user_password))
+            # print('username: %s, user_email: %s, password: %s' % (user_first_name,
+            #                                                       user_email, user_password))
+            """ - После регистрации асинхронно выслать email с паролем """
+            send_email.delay(user_first_name, user_email, user_password)
 
             return redirect(to='ty-signup')
         else:
@@ -62,6 +67,7 @@ class SignUpPage(TemplateView):
 
 
 class LogInPage(TemplateView):
+    """ Логин по email, password """
     template_name = 'books/login.html'
 
     def get(self, request, *args, **kwargs):
@@ -100,25 +106,62 @@ class TySignUpPage(TemplateView):
 
 
 class BookStatisticPage(TemplateView):
+    """ 3.1 Статистика """
     template_name = 'books/books_statistic.html'
 
     def get(self, request, *args, **kwargs):
+        """ - Книг продано всего """
         books_sales = BooksSalesModel.objects.all()
         total_sales = books_sales.aggregate(Sum('sales'))['sales__sum']
 
+        """ - Книг продано за прошлый месяц """
         months = [i for i in range(1, 13)]
         month_now = date.today().month
-
         sales_last_month = books_sales.filter(
-            sold_day__month=months[month_now-2]).aggregate(Sum('sales'))['sales__sum']
+            sold_day__month=months[month_now - 2]).aggregate(Sum('sales'))['sales__sum']
+
+        books_total = BooksModel.objects.all()
+
+        """ - Продано книг по авторам (%) """
+        author_data = []
+        if total_sales:
+            authors = AuthorModel.objects.all()
+            for author in authors:
+                author_books = books_total.filter(author=author)
+                author_sales = 0
+                for book in author_books:
+                    sales__sum = books_sales.filter(book=book).aggregate(Sum('sales'))
+                    if any(sales__sum.values()):
+                        author_sales += sales__sum['sales__sum']
+                author_sales_percent = round(100 * (author_sales / total_sales), 2)
+                author_data.append([author.author_name, author_sales_percent])
+
+        author_data.sort(key=lambda s: s[1], reverse=True)
+
+        """ - Продано книг  """
+        books_sold = 0
+        for book in books_total:
+            is_sold = books_sales.filter(book=book)
+            if any(is_sold):
+                books_sold += 1
+        all_books = books_total.count()
+        if all_books:
+            sold_vs_all_books = round(100 * (books_sold / all_books), 2)
+        else:
+            sold_vs_all_books = 0
 
         response = {'total_sales': total_sales,
                     'sales_last_month': sales_last_month,
+                    'author_data': author_data,
+                    'books_sold': books_sold,
+                    'all_books': all_books,
+                    'sold_vs_all_books': sold_vs_all_books,
                     }
         return render(request=request, template_name=self.template_name, context=response)
 
 
 class NotificationPage(TemplateView):
+    """ 3.3 Список нотификаций """
     template_name = 'books/books_notification.html'
 
     def get(self, request, *args, **kwargs):

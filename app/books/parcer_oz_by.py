@@ -14,10 +14,11 @@ if path not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
 django.setup()
 
-from books.models import BooksModel, BooksSalesModel
+from books.models import BooksModel, BooksSalesModel, AuthorModel
 
 
 def parse_ozby():
+    # books_url = 'https://oz.by/books/'
     books_url = 'https://oz.by/books/bestsellers?page=2'
 
     html_page = requests.get(books_url).text
@@ -29,45 +30,36 @@ def parse_ozby():
     # print(len(item_title), len(author_all))
 
     for title, author in zip(item_title, author_all):
-        sold_today = random.randint(0, 100)
-        month = random.randint(1, 2)
-        if month == 1:
-            day = random.randint(1, 31)
-        else:
-            day = random.randint(1, 28)
-        day_of_sale = date(2020, month, day)
         book_isbn = str(random.randint(10 ** 10, 12 ** 10))
-
         author_parse = author.text.split(',')
         authors = [a.strip() for a in author_parse[:-1]]
+        print(title.text, authors, book_isbn)
 
-        print(title.text, authors, sold_today, day_of_sale, book_isbn)
+        book = BooksModel(title=title.text, isbn=book_isbn)
+        book.save()
 
-        for _author in authors:
-            book = BooksModel(
-                title=title.text,
-                author=_author,
-                isbn=book_isbn
-            )
-            book.save()
+        for i in range(3):  # random 3 book sale
+            sold_today = random.randint(0, 100)
+            month = random.randint(1, 2)
+            if month == 1:
+                day = random.randint(1, 31)
+            else:
+                day = random.randint(1, 28)
+            day_of_sale = date(2020, month, day)
 
-            book_sale = BooksSalesModel(
-                book=book,
-                sales=sold_today,
-                sold_day=day_of_sale,
-            )
+            book_sale = BooksSalesModel(book=book, sales=sold_today, sold_day=day_of_sale)
             book_sale.save()
 
-
-def test_parse():
-    book = BooksModel(title="НИ СЫ. Будь уверен в своих силах и не позволяй сомнениям мешать тебе двигаться вперед",
-                      author="Джен Синсеро, 2018",
-                      sales=30,
-                      sold_day=date(2020, 1, 12),
-                      isbn='111111111111111')
-    book.save()
+        for _author in authors:
+            if _author:
+                try:
+                    book_author = AuthorModel.objects.get(author_name=_author)
+                    book.author.add(book_author)
+                except:
+                    book_author = AuthorModel(author_name=_author)
+                    book_author.save()
+                    book.author.add(book_author)
 
 
 if __name__ == "__main__":
     parse_ozby()
-    # test_parse()

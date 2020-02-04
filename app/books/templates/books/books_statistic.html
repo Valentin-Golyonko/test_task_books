@@ -6,6 +6,42 @@
 
 {% block content %}
 
-    TBA
+    <ul>
+        <li>Total sales: {{ total_sales|default:'No data' }}</li>
+        <li>Sold last month: {{ sales_last_month }}</li>
+        <li>Total books: {{ all_books }}, books sold: {{ books_sold }} ({{ sold_vs_all_books }} %)</li>
+    </ul>
+
+    <h4>Sales per Author:</h4>
+    <input class="form-control" id="search_book" type="text" placeholder="search on the page ...">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Author</th>
+            <th scope="col">Sales, %</th>
+        </tr>
+        </thead>
+        <tbody id="book_table">
+        {% for author, sales in author_data %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ author }}</td>
+                <td>{{ sales }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            $("#search_book").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#book_table tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
 
 {% endblock %}

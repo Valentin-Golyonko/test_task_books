@@ -9,7 +9,7 @@
     <div>
         <h3>Books list</h3>
 
-        <input class="form-control" id="search_book" type="text" placeholder="search on the page ...">
+        <input class="form-control" id="search_book" type="text" placeholder="search on this page ...">
 
         <table class="table table-hover">
             <thead>
@@ -25,7 +25,7 @@
                 <tr>
                     <th scope="row">{{ forloop.counter0|add:page_obj.start_index }}</th>
                     <td>{{ book.title }}</td>
-                    <td>{{ book.author }}</td>
+                    <td>{% for author in book.author.all %}{{ author }}, {% endfor %}</td>
                     <td>{{ book.isbn }}</td>
                 </tr>
             {% endfor %}
