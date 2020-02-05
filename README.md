@@ -45,3 +45,5 @@
 - Создавать могут только авторизованные пользователи. Использовать REST API. 
 - Если создание прошло успешно редиректнуть на список книг. 
 - Если не прошло валидацию на бэке - вывести ошибки
+
+<img src="https://github.com/Valentin-Golyonko/test_task_books/blob/master/main-page.png" alt="main-page">
