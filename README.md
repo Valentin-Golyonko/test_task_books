@@ -1,5 +1,4 @@
 # test_task_books
-Тестовое задание по Python/Django - Сайт
 
 ## как запустить:
 - <code>docker-compose build</code>
@@ -7,6 +6,8 @@
 - <code>docker-compose up</code>
 - админка - имя: admin, пароль: admin, майл: admin@gmail.com
 - 
+
+##Тестовое задание по Python/Django - Сайт
 
 ### 1. Регистрация
 - Обязательные поля email, имя, фамилия, номер телефона

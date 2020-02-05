@@ -70,6 +70,7 @@ class NotificationsModel(models.Model):
     class Meta:
         verbose_name = 'Notification'
         verbose_name_plural = 'Notifications'
+        ordering = ['-id']
 
     def __str__(self):
         return self.message

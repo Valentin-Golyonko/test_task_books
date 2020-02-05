@@ -11,12 +11,13 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions, generics
 from rest_framework.views import APIView
 
 from .backends import work_with_notifications
 from .forms import (SignUpForm, LogInForm)
 from .models import (BooksModel, BooksSalesModel, AuthorModel, NotificationsModel)
+from .serializers import BooksSerializer
 from .tasks import send_email
 
 
@@ -209,7 +210,7 @@ class NotificationPage(TemplateView):
             user_msg = work_with_notifications(request.user, 'get')
             NotificationsModel.objects.filter(sender=request.user, is_read=False).update(is_read=True)
 
-            old_notif = NotificationsModel.objects.filter(sender=request.user, is_read=True).order_by('-id')
+            old_notif = NotificationsModel.objects.filter(sender=request.user, is_read=True)
             msg_old_5 = [i.message for i in old_notif[:5]]
 
             response = {'user_msg': user_msg,
@@ -229,7 +230,6 @@ def logout_user(request):
 
 class ExportBooksPage(APIView):
     template_name = 'books/books_export.html'
-
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
@@ -250,14 +250,14 @@ class ExportBooksPage(APIView):
         return response
 
 
-class AddBooksPage(APIView):
-    template_name = 'books/books_add.html'
+class BooksList(generics.ListCreateAPIView):
+    queryset = BooksModel.objects.all()
+    serializer_class = BooksSerializer
+
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        response = {'is_authed': int(request.user.is_authenticated), }
-        return render(request=request, template_name=self.template_name, context=response)
-
-    def post(self, request):
-        pass
+    def post(self, request, *args, **kwargs):
+        self.create(request, *args, **kwargs)
+        work_with_notifications(request.user, 'set', 'You created a book.')
+        return redirect(to='main-page')

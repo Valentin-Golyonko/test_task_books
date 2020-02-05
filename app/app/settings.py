@@ -64,6 +64,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20,
+    'EXCEPTION_HANDLER': 'books.utils.custom_exception_handler',
 }
 
 MIDDLEWARE = [

@@ -3,7 +3,7 @@ from django.urls import path
 
 from .views import (BooksMainPage, SignUpPage, LogInPage, TySignUpPage,
                     BookStatisticPage, NotificationPage, search_page, logout_user,
-                    ExportBooksPage, AddBooksPage)
+                    ExportBooksPage, BooksList)
 
 urlpatterns = [
     path('', BooksMainPage.as_view(), name='main-page'),
@@ -16,5 +16,5 @@ urlpatterns = [
     path('search/<search_it>/', search_page, name='search'),
     path('logout/', logout_user, name='logout'),
     path('book-export/', ExportBooksPage.as_view(), name='book-export'),
-    path('books-add/', AddBooksPage.as_view(), name='books-add'),
+    path('books-add/', BooksList.as_view(), name='books-add'),
 ]
