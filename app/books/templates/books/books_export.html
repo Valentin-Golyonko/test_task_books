@@ -1,0 +1,14 @@
+{% extends 'books/books_template.html' %}
+
+{% block title %}
+    Export
+{% endblock %}
+
+{% block content %}
+
+    <form method="post" class="text-center">
+        {% csrf_token %}
+        <button class="btn btn-info" type="submit">Download CSV file with all books & authors (titles + names)</button>
+    </form>
+
+{% endblock %}

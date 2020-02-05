@@ -6,7 +6,7 @@
 
 {% block content %}
 
-    <h4>Your notifications, {{ user|default:'?' }}:</h4>
+    <h4>Your notifications, {{ user|default:'NoName' }}:</h4>
     {% if user_msg %}
         {% for message in user_msg %}
             <div class="alert alert-info" role="alert">{{ message }}</div>

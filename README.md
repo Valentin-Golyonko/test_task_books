@@ -1,7 +1,12 @@
 # test_task_books
-Тестовое задание по Python/Django
+Тестовое задание по Python/Django - Сайт
 
-Сайт:
+## как запустить:
+- <code>docker-compose build</code>
+- для использования Django send_mail() нужно указать переменные 'EMAIL_' в .env файле
+- <code>docker-compose up</code>
+- админка - имя: admin, пароль: admin, майл: admin@gmail.com
+- 
 
 ### 1. Регистрация
 - Обязательные поля email, имя, фамилия, номер телефона

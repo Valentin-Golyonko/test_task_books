@@ -1,15 +1,18 @@
+import csv
 from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core.paginator import Paginator
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
+from rest_framework import authentication, permissions
+from rest_framework.views import APIView
 
 from .backends import work_with_notifications
 from .forms import (SignUpForm, LogInForm)
@@ -120,8 +123,7 @@ class TySignUpPage(TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request=request, template_name=self.template_name,
                       context={'messages': get_messages(request),
-                               'is_authed': int(request.user.is_authenticated),
-                               })
+                               'is_authed': int(request.user.is_authenticated), })
 
 
 class BookStatisticPage(TemplateView):
@@ -203,9 +205,8 @@ class NotificationPage(TemplateView):
     template_name = 'books/books_notification.html'
 
     def get(self, request, *args, **kwargs):
-        user_msg = work_with_notifications(request.user, 'get')
-        response = {}
         if request.user.is_authenticated:
+            user_msg = work_with_notifications(request.user, 'get')
             NotificationsModel.objects.filter(sender=request.user, is_read=False).update(is_read=True)
 
             old_notif = NotificationsModel.objects.filter(sender=request.user, is_read=True).order_by('-id')
@@ -216,6 +217,8 @@ class NotificationPage(TemplateView):
                         'msg_old_5': msg_old_5,
                         'is_authed': 1,
                         }
+        else:
+            response = {}
         return render(request=request, template_name=self.template_name, context=response)
 
 
@@ -224,7 +227,37 @@ def logout_user(request):
     return redirect(to='main-page')
 
 
-class SomeClass(TemplateView):
-    @login_required(login_url='login/')
+class ExportBooksPage(APIView):
+    template_name = 'books/books_export.html'
+
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
+        response = {'is_authed': int(request.user.is_authenticated), }
+        return render(request=request, template_name=self.template_name, context=response)
+
+    def post(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="books.csv"'
+        writer = csv.writer(response)
+
+        books_all = BooksModel.objects.all()
+        for book in books_all:
+            authors = [i.author_name for i in book.author.all()]
+            writer.writerow([book.title, ', '.join(authors)])
+
+        return response
+
+
+class AddBooksPage(APIView):
+    template_name = 'books/books_add.html'
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        response = {'is_authed': int(request.user.is_authenticated), }
+        return render(request=request, template_name=self.template_name, context=response)
+
+    def post(self, request):
         pass

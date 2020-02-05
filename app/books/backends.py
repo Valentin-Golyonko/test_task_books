@@ -12,4 +12,4 @@ def work_with_notifications(user, method: str, msg=''):
         elif method == 'count':
             return NotificationsModel.objects.filter(sender=user, is_read=False).count()
     else:
-        print('! NOT A USER !')
+        pass
