@@ -204,17 +204,18 @@ class NotificationPage(TemplateView):
 
     def get(self, request, *args, **kwargs):
         user_msg = work_with_notifications(request.user, 'get')
+        response = {}
+        if request.user.is_authenticated:
+            NotificationsModel.objects.filter(sender=request.user, is_read=False).update(is_read=True)
 
-        NotificationsModel.objects.filter(is_read=False).update(is_read=True)
+            old_notif = NotificationsModel.objects.filter(sender=request.user, is_read=True).order_by('-id')
+            msg_old_5 = [i.message for i in old_notif[:5]]
 
-        old_notif = NotificationsModel.objects.filter(is_read=True).order_by('-id')
-        msg_old_5 = [i.message for i in old_notif[:5]]
-
-        response = {'user_msg': user_msg,
-                    'user': request.user,
-                    'msg_old_5': msg_old_5,
-                    'is_authed': int(request.user.is_authenticated),
-                    }
+            response = {'user_msg': user_msg,
+                        'user': request.user,
+                        'msg_old_5': msg_old_5,
+                        'is_authed': 1,
+                        }
         return render(request=request, template_name=self.template_name, context=response)
 
 

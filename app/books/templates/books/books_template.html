@@ -56,11 +56,11 @@
                     <a class="btn btn-info mr-sm-2" href="{% url 'notifications' %}">
                         Notifications <span class="badge badge-warning">{{ msg_count|default:'0' }}</span>
                     </a>
-                    {% if is_authed == 0 %}
+                    {% if is_authed %}
+                        <a class="btn btn-success" href="{% url 'logout' %}">Logout</a>
+                    {% else %}
                         <a class="btn btn-success mr-sm-2" href="{% url 'login' %}">Login</a>
                         <a class="btn btn-primary" href="{% url 'signup' %}">Register</a>
-                    {% else %}
-                        <a class="btn btn-success" href="{% url 'logout' %}">Logout</a>
                     {% endif %}
                 </form>
             </div>
