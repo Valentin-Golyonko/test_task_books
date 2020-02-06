@@ -14,7 +14,7 @@ if path not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
 django.setup()
 
-from books.models import BooksModel, BooksSalesModel, AuthorModel
+from .models import BooksModel, BookSales, AuthorModel
 
 
 def parse_ozby():
@@ -47,18 +47,18 @@ def parse_ozby():
                 day = random.randint(1, 28)
             day_of_sale = date(2020, month, day)
 
-            book_sale = BooksSalesModel(book=book, sales=sold_today, sold_day=day_of_sale)
+            book_sale = BookSales(book=book, sales=sold_today, sold_day=day_of_sale)
             book_sale.save()
 
         for _author in authors:
             if _author:
                 try:
                     book_author = AuthorModel.objects.get(author_name=_author)
-                    book.author.add(book_author)
+                    book.book_author.add(book_author)
                 except:
                     book_author = AuthorModel(author_name=_author)
                     book_author.save()
-                    book.author.add(book_author)
+                    book.book_author.add(book_author)
 
 
 if __name__ == "__main__":

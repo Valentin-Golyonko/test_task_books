@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
 from .forms import (SignUpForm, LogInForm, AddBookForm)
-from .models import (BooksModel, BooksSalesModel, AuthorModel, Notification)
+from .models import (BooksModel, BookSales, AuthorModel, Notification)
 from .tasks import send_email
 from .utils import work_with_notifications
 
@@ -130,7 +130,7 @@ class BookStatisticPage(TemplateView):
 
     def get(self, request, *args, **kwargs):
         """ - Книг продано всего """
-        books_sales = BooksSalesModel.objects.all()
+        books_sales = BookSales.objects.all()
         total_sales = books_sales.aggregate(Sum('sales'))['sales__sum']
 
         """ - Книг продано за прошлый месяц """

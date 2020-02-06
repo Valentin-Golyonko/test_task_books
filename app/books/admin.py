@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from .models import (Profile, BooksModel, BooksSalesModel,
+from .models import (Profile, BooksModel, BookSales,
                      AuthorModel, Notification)
 
 
 class BooksSalesInline(admin.StackedInline):
-    model = BooksSalesModel
+    model = BookSales
 
 
 class BooksAdmin(admin.ModelAdmin):
@@ -19,6 +19,6 @@ class AuthorAdmin(admin.ModelAdmin):
 
 admin.site.register(Profile)
 admin.site.register(BooksModel, BooksAdmin)
-admin.site.register(BooksSalesModel)
+admin.site.register(BookSales)
 admin.site.register(Notification)
 admin.site.register(AuthorModel, AuthorAdmin)

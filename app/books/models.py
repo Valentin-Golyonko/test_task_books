@@ -52,8 +52,8 @@ class BooksModel(models.Model):
         return self.book_title
 
 
-class BooksSalesModel(models.Model):
-    book = models.ForeignKey(BooksModel, on_delete=models.CASCADE, blank=True, null=True)
+class BookSales(models.Model):
+    book = models.ForeignKey(BooksModel, on_delete=models.SET_NULL, blank=True, null=True)
     sales = models.PositiveIntegerField(default=0, blank=True, null=True)
     sold_day = models.DateField(blank=True, null=True)
 
