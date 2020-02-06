@@ -39,9 +39,9 @@ class AuthorModel(models.Model):
 
 
 class BooksModel(models.Model):
-    title = models.CharField(max_length=200)
-    isbn = models.CharField(max_length=20)
-    author = models.ManyToManyField(to='AuthorModel')
+    book_title = models.CharField(max_length=200)
+    book_isbn = models.CharField(max_length=20)
+    book_author = models.ManyToManyField(AuthorModel)
 
     class Meta:
         verbose_name = 'Book'
@@ -49,7 +49,7 @@ class BooksModel(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return self.title
+        return self.book_title
 
 
 class BooksSalesModel(models.Model):
@@ -62,7 +62,7 @@ class BooksSalesModel(models.Model):
         verbose_name_plural = 'Books sales'
 
     def __str__(self):
-        return self.book.title
+        return self.book.book_title
 
 
 class Notification(models.Model):

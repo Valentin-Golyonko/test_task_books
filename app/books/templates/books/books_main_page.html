@@ -36,9 +36,9 @@
             {% for book in page_obj %}
                 <tr>
                     <th scope="row">{{ forloop.counter0|add:page_obj.start_index }}</th>
-                    <td>{{ book.title }}</td>
-                    <td>{% for author in book.author.all %}{{ author }}, {% endfor %}</td>
-                    <td>{{ book.isbn }}</td>
+                    <td>{{ book.book_title }}</td>
+                    <td>{% for author in book.book_author.all %}{{ author }}, {% endfor %}</td>
+                    <td>{{ book.book_isbn }}</td>
                 </tr>
             {% endfor %}
             </tbody>

@@ -22,4 +22,4 @@ class LogInForm(forms.Form):
 class AddBookForm(forms.ModelForm):
     class Meta:
         model = BooksModel
-        fields = ('title', 'author', 'isbn',)
+        fields = ('book_title', 'book_author', 'book_isbn',)

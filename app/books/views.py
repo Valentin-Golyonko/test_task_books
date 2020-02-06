@@ -146,7 +146,7 @@ class BookStatisticPage(TemplateView):
         if total_sales:
             authors = AuthorModel.objects.all()
             for author in authors:
-                author_books = books_total.filter(author=author)
+                author_books = books_total.filter(book_author=author)
                 author_sales = 0
                 for book in author_books:
                     sales__sum = books_sales.filter(book=book).aggregate(Sum('sales'))
@@ -243,8 +243,8 @@ class ExportBooksPage(TemplateView):
 
             books_all = BooksModel.objects.all()
             for book in books_all:
-                authors = [i.author_name for i in book.author.all()]
-                writer.writerow([book.title, ', '.join(authors)])
+                authors = [i.author_name for i in book.book_author.all()]
+                writer.writerow([book.book_title, ', '.join(authors)])
 
             return response
         else:
