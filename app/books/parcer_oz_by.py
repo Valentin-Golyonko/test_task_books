@@ -14,7 +14,7 @@ if path not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
 django.setup()
 
-from .models import BooksModel, BookSales, AuthorModel
+from books.models import BooksModel, BookSales, AuthorModel
 
 
 def parse_ozby():
