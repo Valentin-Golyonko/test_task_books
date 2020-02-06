@@ -8,11 +8,10 @@ from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core.paginator import Paginator
 from django.db.models import Sum
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from rest_framework import authentication, permissions, generics
-from rest_framework.views import APIView
 
 from .backends import work_with_notifications
 from .forms import (SignUpForm, LogInForm)
@@ -228,26 +227,27 @@ def logout_user(request):
     return redirect(to='main-page')
 
 
-class ExportBooksPage(APIView):
+class ExportBooksPage(TemplateView):
     template_name = 'books/books_export.html'
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         response = {'is_authed': int(request.user.is_authenticated), }
         return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="books.csv"'
-        writer = csv.writer(response)
+        if request.user.is_authenticated:
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="books.csv"'
+            writer = csv.writer(response)
 
-        books_all = BooksModel.objects.all()
-        for book in books_all:
-            authors = [i.author_name for i in book.author.all()]
-            writer.writerow([book.title, ', '.join(authors)])
+            books_all = BooksModel.objects.all()
+            for book in books_all:
+                authors = [i.author_name for i in book.author.all()]
+                writer.writerow([book.title, ', '.join(authors)])
 
-        return response
+            return response
+        else:
+            return JsonResponse({'redirect': '/login/'})
 
 
 class BooksList(generics.ListCreateAPIView):

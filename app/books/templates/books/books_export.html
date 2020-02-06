@@ -8,7 +8,47 @@
 
     <form method="post" class="text-center">
         {% csrf_token %}
-        <button class="btn btn-info" type="submit">Download CSV file with all books & authors (titles + names)</button>
+        <button class="btn btn-info" type="submit" id="some_btn">
+            Download CSV file with all books & authors (titles + names)
+        </button>
     </form>
+
+    <script>
+        var token = '{{csrf_token}}';
+
+        $('#some_btn').on('click', function () {
+            $.ajax({
+                headers: {"X-CSRFToken": token},
+                method: 'POST',
+                url: "{% url 'book-export' %}",
+                data: {'some-data': 'ajax'},
+                dataType: 'json',
+                success: function (data) {
+                    console.log('success!', data);
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                },
+                error: function (error) {
+                    console.log('error!', error);
+                },
+            });
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+        });
+
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+    </script>
 
 {% endblock %}
