@@ -46,4 +46,10 @@
 - Если создание прошло успешно редиректнуть на список книг. 
 - Если не прошло валидацию на бэке - вывести ошибки
 
+## Done!
+
+### Main page:
 <img src="https://github.com/Valentin-Golyonko/test_task_books/blob/master/main-page.png" alt="main-page">
+
+### email авторизация:
+<img src="https://github.com/Valentin-Golyonko/test_task_books/blob/master/signup.png" alt="signup">
