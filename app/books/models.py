@@ -1,6 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import User
 from django.db import models
+
+UserModel = get_user_model()
 
 
 class Profile(models.Model):
@@ -8,7 +11,7 @@ class Profile(models.Model):
     - Обязательные поля email, имя, фамилия, номер телефона
     - Необязательные поля адрес, город
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(max_length=30, unique=True)
@@ -22,6 +25,17 @@ class Profile(models.Model):
     class Meta:
         verbose_name = 'User Profile'
         verbose_name_plural = 'Users Profiles'
+
+
+class AuthorModel(models.Model):
+    author_name = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Author'
+        verbose_name_plural = 'Authors'
+
+    def __str__(self):
+        return self.author_name
 
 
 class BooksModel(models.Model):
@@ -39,7 +53,7 @@ class BooksModel(models.Model):
 
 
 class BooksSalesModel(models.Model):
-    book = models.ForeignKey(to='BooksModel', on_delete=models.CASCADE, blank=True, null=True)
+    book = models.ForeignKey(BooksModel, on_delete=models.CASCADE, blank=True, null=True)
     sales = models.PositiveIntegerField(default=0, blank=True, null=True)
     sold_day = models.DateField(blank=True, null=True)
 
@@ -51,19 +65,8 @@ class BooksSalesModel(models.Model):
         return self.book.title
 
 
-class AuthorModel(models.Model):
-    author_name = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Author'
-        verbose_name_plural = 'Authors'
-
-    def __str__(self):
-        return self.author_name
-
-
 class Notification(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     message = models.CharField(max_length=50, blank=True, null=True)
     is_read = models.BooleanField(default=False)
 
