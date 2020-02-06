@@ -3,16 +3,16 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class ProfileModel(models.Model):
+class Profile(models.Model):
     """
     - Обязательные поля email, имя, фамилия, номер телефона
     - Необязательные поля адрес, город
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=30, blank=False, null=False)
-    last_name = models.CharField(max_length=30, blank=False, null=False)
-    email = models.EmailField(max_length=30, blank=False, null=False, unique=True)
-    phone = models.CharField(max_length=20, blank=False, null=False)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField(max_length=30, unique=True)
+    phone = models.CharField(max_length=20)
     address = models.CharField(max_length=100, blank=True, null=True)
     city = models.CharField(max_length=20, blank=True, null=True)
 
@@ -25,8 +25,8 @@ class ProfileModel(models.Model):
 
 
 class BooksModel(models.Model):
-    title = models.CharField(max_length=200, blank=True, null=True)
-    isbn = models.CharField(max_length=20, blank=True, null=True)
+    title = models.CharField(max_length=200)
+    isbn = models.CharField(max_length=20)
     author = models.ManyToManyField(to='AuthorModel')
 
     class Meta:
@@ -62,7 +62,7 @@ class AuthorModel(models.Model):
         return self.author_name
 
 
-class NotificationsModel(models.Model):
+class Notification(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.CharField(max_length=50, blank=True, null=True)
     is_read = models.BooleanField(default=False)

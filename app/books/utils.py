@@ -1,7 +1,7 @@
 from django.contrib import messages
 from rest_framework.views import exception_handler
 
-from .backends import work_with_notifications
+from .models import Notification
 
 
 def custom_exception_handler(exc, context):
@@ -15,3 +15,17 @@ def custom_exception_handler(exc, context):
         messages.error(context['request'], 'Error in Add Book %s' % errors)
 
     return response
+
+
+def work_with_notifications(user, method: str, msg=''):
+    if user.is_authenticated:
+        if method == 'get':
+            personal_msgs = Notification.objects.filter(sender=user, is_read=False)
+            return [i.message for i in personal_msgs]
+        elif method == 'set':
+            ntf = Notification(sender=user, message=msg)
+            ntf.save()
+        elif method == 'count':
+            return Notification.objects.filter(sender=user, is_read=False).count()
+    else:
+        pass

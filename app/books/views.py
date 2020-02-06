@@ -11,13 +11,11 @@ from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-from rest_framework import authentication, permissions, generics
 
-from .backends import work_with_notifications
-from .forms import (SignUpForm, LogInForm)
-from .models import (BooksModel, BooksSalesModel, AuthorModel, NotificationsModel)
-from .serializers import BooksSerializer
+from .forms import (SignUpForm, LogInForm, AddBookForm)
+from .models import (BooksModel, BooksSalesModel, AuthorModel, Notification)
 from .tasks import send_email
+from .utils import work_with_notifications
 
 
 class BooksMainPage(TemplateView):
@@ -207,9 +205,9 @@ class NotificationPage(TemplateView):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             user_msg = work_with_notifications(request.user, 'get')
-            NotificationsModel.objects.filter(sender=request.user, is_read=False).update(is_read=True)
+            Notification.objects.filter(sender=request.user, is_read=False).update(is_read=True)
 
-            old_notif = NotificationsModel.objects.filter(sender=request.user, is_read=True)
+            old_notif = Notification.objects.filter(sender=request.user, is_read=True)
             msg_old_5 = [i.message for i in old_notif[:5]]
 
             response = {'user_msg': user_msg,
@@ -218,12 +216,15 @@ class NotificationPage(TemplateView):
                         'is_authed': 1,
                         }
         else:
-            response = {}
+            messages.warning(request, "Unauthorized users can't see notifications.")
+            response = {'is_authed': 0,
+                        'messages': get_messages(request), }
         return render(request=request, template_name=self.template_name, context=response)
 
 
 def logout_user(request):
     logout(request)
+    messages.success(request, 'Log out successful!')
     return redirect(to='main-page')
 
 
@@ -247,17 +248,31 @@ class ExportBooksPage(TemplateView):
 
             return response
         else:
+            messages.error(request, 'Login required!')
             return JsonResponse({'redirect': '/login/'})
 
 
-class BooksList(generics.ListCreateAPIView):
-    queryset = BooksModel.objects.all()
-    serializer_class = BooksSerializer
+class BooksList(TemplateView):
+    template_name = 'books/books_add.html'
 
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        form = AddBookForm()
+        response = {'is_authed': int(request.user.is_authenticated),
+                    'messages': get_messages(request),
+                    'form': form,
+                    }
+        return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request, *args, **kwargs):
-        self.create(request, *args, **kwargs)
-        work_with_notifications(request.user, 'set', 'You created a book.')
-        return redirect(to='main-page')
+        if request.user.is_authenticated:
+            form = AddBookForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Book added successful!')
+                return redirect(to='main-page')
+            else:
+                messages.error(request, 'Form validation error!')
+                return JsonResponse({'redirect': '/books-add/'})
+        else:
+            messages.error(request, 'Login required!')
+            return JsonResponse({'redirect': '/login/'})
