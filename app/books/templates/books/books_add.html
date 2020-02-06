@@ -7,7 +7,7 @@
 {% block content %}
     {% load crispy_forms_tags %}
 
-    <form method="post" class="text-center">
+    <form>
         {% csrf_token %}
         {{ form|crispy }}
         <button class="btn btn-info" type="submit" id="btn_add">Add Book</button>
@@ -17,11 +17,19 @@
         var token = '{{csrf_token}}';
 
         $('#btn_add').on('click', function () {
+            var book_title = $('#id_book_title').val();
+            var book_author = $('#id_book_author').val();
+            var book_isbn = $('#id_book_isbn').val();
+
             $.ajax({
                 headers: {"X-CSRFToken": token},
                 method: 'POST',
-                url: "{% url 'book-export' %}",
-                data: {'some-data': 'ajax'},
+                url: "{% url 'add-book' %}",
+                data: {
+                    'book_title': book_title,
+                    'book_author': book_author,
+                    'book_isbn': book_isbn,
+                },
                 dataType: 'json',
                 success: function (data) {
                     console.log('success!', data);
@@ -30,26 +38,24 @@
                     }
                 },
                 error: function (error) {
-                    console.log('error!', error);
+                    console.log('error!');
                 },
             });
-        });
 
-        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+            var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 
-        function csrfSafeMethod(method) {
-            // these HTTP methods do not require CSRF protection
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-        }
-
-        $('#id_book_author').on('click', find_author);
-
-        $.ajaxSetup({
-            beforeSend: function (xhr, settings) {
-                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
             }
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
         });
     </script>
 

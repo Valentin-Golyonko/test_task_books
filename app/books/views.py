@@ -1,5 +1,6 @@
 import csv
 from datetime import date
+from http import HTTPStatus
 
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
@@ -186,9 +187,9 @@ def search_page(request, search_it):
     if request.method == 'GET':
         work_with_notifications(request.user, method='set', msg="search: %s" % search_it)
 
-        data = {'found_books': BooksModel.objects.filter(title__contains=search_it),
+        data = {'found_books': BooksModel.objects.filter(book_title__contains=search_it),
                 'found_authors': AuthorModel.objects.filter(author_name__contains=search_it),
-                'found_isbn': BooksModel.objects.filter(isbn__contains=search_it),
+                'found_isbn': BooksModel.objects.filter(book_isbn__contains=search_it),
                 'search_it': search_it,
                 'msg_count': work_with_notifications(request.user, 'count'),
                 'is_authed': int(request.user.is_authenticated),
@@ -213,12 +214,14 @@ class NotificationPage(TemplateView):
             response = {'user_msg': user_msg,
                         'user': request.user,
                         'msg_old_5': msg_old_5,
-                        'is_authed': 1,
+                        'is_authed': int(request.user.is_authenticated),
+                        'msg_count': work_with_notifications(request.user, 'count'),
                         }
         else:
             messages.warning(request, "Unauthorized users can't see notifications.")
             response = {'is_authed': 0,
-                        'messages': get_messages(request), }
+                        'messages': get_messages(request),
+                        }
         return render(request=request, template_name=self.template_name, context=response)
 
 
@@ -232,7 +235,9 @@ class ExportBooksPage(TemplateView):
     template_name = 'books/books_export.html'
 
     def get(self, request, *args, **kwargs):
-        response = {'is_authed': int(request.user.is_authenticated), }
+        response = {'is_authed': int(request.user.is_authenticated),
+                    'msg_count': work_with_notifications(request.user, 'count'),
+                    }
         return render(request=request, template_name=self.template_name, context=response)
 
     def post(self, request):
@@ -252,7 +257,7 @@ class ExportBooksPage(TemplateView):
             return JsonResponse({'redirect': '/login/'})
 
 
-class BooksList(TemplateView):
+class BookAddPage(TemplateView):
     template_name = 'books/books_add.html'
 
     def get(self, request, *args, **kwargs):
@@ -260,19 +265,35 @@ class BooksList(TemplateView):
         response = {'is_authed': int(request.user.is_authenticated),
                     'messages': get_messages(request),
                     'form': form,
+                    'msg_count': work_with_notifications(request.user, 'count'),
                     }
         return render(request=request, template_name=self.template_name, context=response)
 
-    def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            form = AddBookForm(request.POST)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Book added successful!')
-                return redirect(to='main-page')
-            else:
-                messages.error(request, 'Form validation error!')
-                return JsonResponse({'redirect': '/books-add/'})
+
+def add_book(request):
+    if request.user.is_authenticated:
+        try:
+            title = request.POST['book_title']
+            author = request.POST.getlist('book_author[]')
+            isbn = request.POST['book_isbn']
+        except Exception as ex:
+            print('Exception in add_book: %s' % ex)
+            return HttpResponse(HTTPStatus.BAD_REQUEST)
         else:
-            messages.error(request, 'Login required!')
-            return JsonResponse({'redirect': '/login/'})
+            if title and any(author) and isbn:
+                for a in author:
+                    author_found = AuthorModel.objects.get(id=a)
+                    new_book = BooksModel(
+                        book_title=title,
+                        book_isbn=isbn,
+                    )
+                    new_book.save()
+                    new_book.book_author.add(author_found)
+                    work_with_notifications(request.user, 'set', 'Book created successful.'),
+                    messages.success(request, 'Book created successful.')
+                return JsonResponse({'redirect': '/'})
+            else:
+                return HttpResponse(HTTPStatus.BAD_REQUEST)
+    else:
+        messages.error(request, 'Login required!')
+        return JsonResponse({'redirect': '/login/'})

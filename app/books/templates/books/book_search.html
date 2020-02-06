@@ -10,7 +10,7 @@
 
     <h4>Books:</h4>
     {% for found_book in found_books %}
-        <p>{{ found_book.title }}</p>
+        <p>{{ found_book.book_title }}</p>
     {% empty %}
         <p>Nothing was found</p>
     {% endfor %}
@@ -23,8 +23,8 @@
     {% endfor %}
 
     <h4>Books with ISBN:</h4>
-    {% for isbn in found_isbn %}
-        <p>{{ isbn }}</p>
+    {% for book in found_isbn %}
+        <p>{{ book.book_isbn }}</p>
     {% empty %}
         <p>Nothing was found</p>
     {% endfor %}
