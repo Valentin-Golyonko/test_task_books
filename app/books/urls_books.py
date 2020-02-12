@@ -3,7 +3,7 @@ from django.urls import path
 
 from .views import (BooksMainPage, SignUpPage, LogInPage, TySignUpPage,
                     BookStatisticPage, NotificationPage, search_page, logout_user,
-                    ExportBooksPage, BookAddPage, add_book)
+                    ExportBooksPage, BookAddPage, add_book, OneBook)
 
 urlpatterns = [
     path('', BooksMainPage.as_view(), name='main-page'),
@@ -18,4 +18,5 @@ urlpatterns = [
     path('book-export/', ExportBooksPage.as_view(), name='book-export'),
     path('books-add/', BookAddPage.as_view(), name='books-add'),
     path('add-book/', add_book, name='add-book'),
+    path('one-book/<int:book_id>/', OneBook.as_view(), name='one-book'),
 ]

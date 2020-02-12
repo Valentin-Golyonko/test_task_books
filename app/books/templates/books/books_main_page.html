@@ -39,6 +39,7 @@
                     <td>{{ book.book_title }}</td>
                     <td>{% for author in book.book_author.all %}{{ author }}, {% endfor %}</td>
                     <td>{{ book.book_isbn }}</td>
+                    <td><a href="{% url 'one-book' book.pk %}">Link</a></td>
                 </tr>
             {% endfor %}
             </tbody>

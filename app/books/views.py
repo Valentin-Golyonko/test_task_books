@@ -5,12 +5,14 @@ from http import HTTPStatus
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth import logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from .forms import (SignUpForm, LogInForm, AddBookForm)
@@ -281,6 +283,7 @@ def add_book(request):
             return HttpResponse(HTTPStatus.BAD_REQUEST)
         else:
             if title and any(author) and isbn:
+                new_book = None
                 for a in author:
                     author_found = AuthorModel.objects.get(id=a)
                     new_book = BooksModel(
@@ -297,3 +300,16 @@ def add_book(request):
     else:
         messages.error(request, 'Login required!')
         return JsonResponse({'redirect': '/login/'})
+
+
+class OneBook(LoginRequiredMixin, TemplateView):
+    template_name = 'books/one_book.html'
+    login_url = '/login/'
+
+    def get(self, request, *args, **kwargs):
+        print(kwargs)
+        response = {'book': BooksModel.objects.get(id=kwargs['book_id'])}
+        return render(request=request, template_name=self.template_name, context=response)
+
+    def post(self, request):
+        return redirect(to='main-page')

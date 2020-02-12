@@ -1,0 +1,15 @@
+{% extends 'books/books_template.html' %}
+
+{% block title %}
+    {{ book.book_title }}
+{% endblock %}
+
+{% block content %}
+
+    <p>book title: {{ book.book_title }}</p>
+    <p>book authors: {% for author in book.book_author.all %}{{ author }}, {% endfor %}</p>
+    <p>book isbn: {{ book.book_isbn }}</p>
+
+    <a class="btn btn-success" href="{% url 'main-page' %}">Back</a>
+
+{% endblock %}
